@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicAssist | AI-Powered Smart Civic Complaint System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Light Mode Glass Effect */
+        .glass { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8); 
+        }
+        
+        /* Light Mode Card Effect */
+        .glass-card { 
+            background: #ffffff; 
+            border: 1px solid rgba(226, 232, 240, 0.8); 
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); 
+        }
+        
+        /* Gradient Text for Light Background */
+        .text-gradient { 
+            background-clip: text; 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-image: linear-gradient(to right, #4f46e5, #9333ea); 
+        }
+        
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        
+        /* Custom Scrollbar for Light Mode */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-900" x-data="civicApp()">
+
+    <nav class="fixed w-full z-50 glass transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="/" class="flex items-center cursor-pointer hover:opacity-90 transition-opacity">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 mr-3">
+                        <span class="text-xl">🏛️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Civic<span class="text-indigo-600">Assist</span></h1>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">Govt. Grievance Portal</p>
+                    </div>
+                </a>
+
+                <div class="flex items-center space-x-6">
+                    <div class="hidden md:flex items-center space-x-2 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span x-text="currentTime" class="text-sm font-medium text-slate-600"></span>
+                    </div>
+                    
+                   <div class="flex space-x-4">
+                    <a href="{% url 'login' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center"> Login</a>
+                     <a href="{% url 'login' %}" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-xl font-semibold shadow-lg shadow-indigo-500/20 transition-all hover:-translate-y-0.5 flex items-center justify-center"> Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-20 min-h-screen">
+        
+        <section class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-indigo-100/50 rounded-full blur-3xl -z-10 opacity-60 pointer-events-none"></div>
+            
+            <div class="inline-flex items-center space-x-2 bg-indigo-50 border border-indigo-100 rounded-full px-4 py-1.5 mb-8">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                <span class="text-sm font-medium text-indigo-700">Live SLA Tracking Active</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 text-slate-900">
+                AI-Powered Smart <br />
+                <span class="text-gradient">Civic Complaint System</span>
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-12 font-light">
+                Integrated Municipal & State Online Grievance Portal. Report, track, and resolve local issues with guaranteed SLA enforcement.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <a href="{% url 'login' %}" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-bold text-lg hover:shadow-xl hover:shadow-indigo-500/30 transition-all hover:-translate-y-1 inline-block">
+                    File a Complaint
+                </a>
+                <button class="w-full sm:w-auto px-8 py-4 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-lg hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 transition-all flex items-center justify-center group shadow-sm">
+                    <svg class="w-5 h-5 mr-2 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
+                    </svg>
+                    Watch Demo
+                </button>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="glass-card p-6 rounded-2xl text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl font-bold text-slate-800 mb-2" x-text="stats.total">14,205</div>
+                    <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Total Complaints</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl font-bold text-emerald-600 mb-2" x-text="stats.resolved">342</div>
+                    <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Resolved Today</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl font-bold text-amber-500 mb-2" x-text="stats.pending">1,120</div>
+                    <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Pending Active</div>
+                </div>
+                <div class="glass-card p-6 rounded-2xl text-center hover:shadow-lg transition-shadow">
+                    <div class="text-4xl font-bold text-indigo-600 mb-2">24h</div>
+                    <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Avg Resolution</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold text-slate-900 mb-4">18 Official Departments</h2>
+                <p class="text-xl text-slate-500">Auto-routed via AI to the exact municipal or state authority.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <template x-for="dept in departments" :key="dept.name">
+                    <div class="glass-card p-6 rounded-2xl hover:-translate-y-2 transition-transform duration-300 cursor-pointer group hover:border-indigo-100">
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="text-3xl" x-text="dept.icon"></span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border" 
+                                  :class="getBadgeColor(dept.category)" x-text="dept.category"></span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-indigo-600 transition-colors" x-text="dept.name"></h3>
+                        <p class="text-sm text-slate-500 mb-4 h-10" x-text="dept.covers"></p>
+                        <div class="flex justify-between items-center pt-4 border-t border-slate-100">
+                            <span class="text-xs text-slate-400">Active Issues</span>
+                            <span class="text-sm font-bold text-indigo-600" x-text="Math.floor(Math.random() * 500) + 50"></span>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end" x-data="{ chatOpen: false }">
+        <div x-show="chatOpen" x-transition.origin.bottom.right style="display:none;" class="glass-card w-80 h-96 rounded-2xl mb-4 flex flex-col overflow-hidden shadow-2xl border border-indigo-200">
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🤖</span>
+                    <h3 class="font-bold text-white text-sm">Civic AI Assistant</h3>
+                </div>
+                <button @click="chatOpen = false" class="text-white/70 hover:text-white">✕</button>
+            </div>
+            <div class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs font-bold border border-indigo-200">AI</div>
+                    <div class="bg-white rounded-tr-xl rounded-br-xl rounded-bl-xl p-3 text-sm text-slate-700 shadow-sm border border-slate-200">
+                        Hello! I can help you find departments or check your complaint status. What do you need?
+                    </div>
+                </div>
+            </div>
+            <div class="p-3 bg-white border-t border-slate-100 flex">
+                <input type="text" placeholder="Type a message..." class="flex-1 bg-slate-50 border border-slate-200 rounded-l-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-indigo-300">
+                <button class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-r-lg text-white transition-colors">➤</button>
+            </div>
+        </div>
+
+        <button @click="chatOpen = !chatOpen" class="w-14 h-14 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:scale-110 transition-transform hover:shadow-indigo-500/50">
+            <svg x-show="!chatOpen" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+            <span x-show="chatOpen" style="display:none;" class="text-white font-bold text-xl">✕</span>
+        </button>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 text-slate-600 py-16">
+        <div class="max-w-6xl mx-auto px-6 text-center">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+                <div class="space-y-2 text-left">
+                    <h3 class="text-2xl font-bold text-slate-900">CivicAssist</h3>
+                    <p class="text-slate-500 max-w-md text-sm">
+                        India's fastest citizen complaint resolution system. 
+                        18 departments, ML powered, 92% success rate.
+                    </p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-indigo-600 transition-colors">Demo</a>
+                    <a href="#" class="hover:text-indigo-600 transition-colors">Contact</a>
+                    <a href="#" class="hover:text-indigo-600 transition-colors">GitHub</a>
+                </div>
+            </div>
+            <div class="border-t border-slate-100 mt-12 pt-8 text-slate-400 text-sm">
+                © 2026 Shivam Makode. All rights reserved. Made with ❤️ for better governance.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function civicApp() {
+            return {
+                currentTime: '',
+                
+                init() {
+                    this.updateTime();
+                    setInterval(() => this.updateTime(), 1000);
+                },
+
+                updateTime() {
+                    const now = new Date();
+                    this.currentTime = now.toLocaleString('en-IN', { 
+                        timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', 
+                        hour: '2-digit', minute: '2-digit', second: '2-digit' 
+                    });
+                },
+
+                stats: { total: 12500, resolved: 342, pending: 1120 },
+                
+                getBadgeColor(category) {
+                    const colors = {
+                        'Municipal': 'border-blue-200 text-blue-600 bg-blue-50',
+                        'State': 'border-purple-200 text-purple-600 bg-purple-50',
+                        'Police': 'border-red-200 text-red-600 bg-red-50',
+                        'District': 'border-emerald-200 text-emerald-600 bg-emerald-50',
+                        'Judicial': 'border-orange-200 text-orange-600 bg-orange-50'
+                    };
+                    return colors[category] || 'border-slate-200 text-slate-500 bg-slate-50';
+                },
+
+                departments: [
+                    { name: 'Public Works Dept', category: 'Municipal', covers: 'Roads, potholes, footpaths', icon: '🛣️' },
+                    { name: 'Water Supply', category: 'Municipal', covers: 'Water shortage, leakage', icon: '💧' },
+                    { name: 'Solid Waste Mgmt', category: 'Municipal', covers: 'Garbage collection, cleaning', icon: '🚛' },
+                    { name: 'Health Department', category: 'Municipal', covers: 'Dispensaries, sanitation', icon: '🏥' },
+                    { name: 'Sewerage & Drainage', category: 'Municipal', covers: 'Manhole cleaning, waterlogging', icon: '🕳️' },
+                    { name: 'Electricity Board', category: 'State', covers: 'Power cuts, transformers', icon: '⚡' },
+                    { name: 'PHED', category: 'State', covers: 'Water schemes, contamination', icon: '🚰' },
+                    { name: 'PWD - Roads', category: 'State', covers: 'Highways, bridges, signage', icon: '🌉' },
+                    { name: 'Traffic Police', category: 'Police', covers: 'Signals, parking, traffic', icon: '🚦' },
+                    { name: 'Fire Department', category: 'Municipal', covers: 'Fire tenders, safety', icon: '🚒' },
+                    { name: 'District Health', category: 'District', covers: 'Govt hospitals, ambulances', icon: '🚑' },
+                    { name: 'Pollution Control', category: 'State', covers: 'Industrial pollution, noise', icon: '🏭' },
+                    { name: 'Food & Civil Supplies', category: 'State', covers: 'Ration distribution, PDS', icon: '🌾' },
+                    { name: 'Local Police', category: 'Police', covers: 'Patrolling, safety, petty crimes', icon: '🚓' },
+                    { name: 'Consumer Forum', category: 'Judicial', covers: 'Billing disputes, service', icon: '⚖️' },
+                    { name: 'Revenue Dept', category: 'District', covers: 'Land records, property tax', icon: '📄' },
+                    { name: 'Town Planning', category: 'Municipal', covers: 'Permissions, encroachments', icon: '🏗️' },
+                    { name: 'Parks & Gardens', category: 'Municipal', covers: 'Park maintenance, playgrounds', icon: '🌳' }
+                ]
+            }
+        }
+    </script>
+</body>
+</html>

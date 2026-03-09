@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complaint {{ complaint.ticket_number }} | CivicAssist{% endblock %}
+
+{% block nav_actions %}
+{% if request.user.is_citizen %}
+    <a href="{% url 'citizen_dashboard' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 transition-all">
+        Dashboard
+    </a>
+{% else %}
+    <a href="{% url 'official_dashboard' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 transition-all">
+        Official Dashboard
+    </a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="glass-card rounded-3xl p-8 shadow-2xl border border-slate-200 bg-white space-y-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1">
+                    Ticket {{ complaint.ticket_number }}
+                </h1>
+                <p class="text-slate-500 text-sm">
+                    Filed on {{ complaint.created_at|date:"d M Y, H:i" }} &middot; Department:
+                    <span class="font-semibold text-slate-800">{{ complaint.department.name }}</span>
+                </p>
+            </div>
+            <div class="space-y-2 text-right text-xs">
+                <div>
+                    {% if complaint.status == 'CLOSED' %}
+                        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold border border-emerald-100">
+                            CLOSED
+                        </span>
+                    {% elif complaint.status == 'REOPENED' %}
+                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold border border-blue-100">
+                            REOPENED
+                        </span>
+                    {% elif complaint.status == 'TRANSFERRED' %}
+                        <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-[11px] font-bold border border-purple-100">
+                            TRANSFERRED
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold border border-amber-100">
+                            OPEN
+                        </span>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if complaint.priority == 'CRITICAL' %}
+                        <span class="px-3 py-1 rounded-full bg-red-50 text-red-600 text-[11px] font-bold border border-red-100">
+                            CRITICAL PRIORITY
+                        </span>
+                    {% elif complaint.priority == 'HIGH' %}
+                        <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-600 text-[11px] font-bold border border-amber-100">
+                            HIGH PRIORITY
+                        </span>
+                    {% elif complaint.priority == 'MEDIUM' %}
+                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[11px] font-bold border border-blue-100">
+                            MEDIUM PRIORITY
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 rounded-full bg-slate-50 text-slate-600 text-[11px] font-bold border border-slate-100">
+                            LOW PRIORITY
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-2">
+                <h2 class="text-sm font-semibold text-slate-700 mb-2">Issue Description</h2>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-700 whitespace-pre-line">
+                    {{ complaint.description }}
+                </div>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-700 mb-2">Location</h2>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-sm text-slate-700 space-y-1">
+                        <p>{{ complaint.location }}</p>
+                        {% if complaint.city or complaint.pincode or complaint.district %}
+                            <p class="text-xs text-slate-500">
+                                {% if complaint.city %}City: <span class="font-semibold text-slate-700">{{ complaint.city }}</span>{% endif %}
+                                {% if complaint.district %}
+                                    · District: <span class="font-semibold text-slate-700">{{ complaint.district }}</span>
+                                {% endif %}
+                                {% if complaint.pincode %}
+                                    · Pincode: <span class="font-semibold text-slate-700">{{ complaint.pincode }}</span>
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-700 mb-2">Original Department</h2>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-xs text-slate-700">
+                        {% if complaint.original_department %}
+                            {{ complaint.original_department.name }}
+                        {% else %}
+                            {{ complaint.department.name }}
+                        {% endif %}
+                    </div>
+                </div>
+                {% if complaint.image %}
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-700 mb-2">Attached Photo</h2>
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-2 overflow-hidden">
+                        <img src="{{ complaint.image.url }}" alt="Complaint image"
+                             class="w-full h-40 object-cover rounded-2xl border border-slate-100">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+            {% if request.user.is_citizen %}
+                <p class="text-[11px] text-slate-400">
+                    If your issue is not resolved even after marked closed, you can reopen the ticket.
+                </p>
+                <div class="flex items-center space-x-3">
+                    {% if complaint.status == 'CLOSED' %}
+                    <form method="POST" action="{% url 'reopen_complaint' complaint.id %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all">
+                            Reopen Complaint
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% if complaint.status != 'CLOSED' and not complaint.department.is_helpline %}
+                    <form method="POST" action="{% url 'send_to_helpline' complaint.id %}" onsubmit="return confirm('Send this complaint to Helpline department for escalation?');">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="inline-flex items-center justify-center px-4 py-2.5 rounded-2xl bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200 hover:bg-amber-600 hover:text-white transition-all">
+                            Send to Helpline
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div></div>
+                {% if complaint.status != 'CLOSED' %}
+                <form method="POST" action="{% url 'close_complaint' complaint.id %}"
+                      onsubmit="return confirm('Are you sure you want to close this complaint?');">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="inline-flex items-center justify-center px-5 py-2.5 rounded-2xl bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-all">
+                        Close Complaint
+                    </button>
+                </form>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        {% if history_events %}
+        <div class="pt-6 border-t border-slate-100">
+            <h2 class="text-sm font-semibold text-slate-700 mb-3">Activity History</h2>
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100/70 text-slate-500 font-bold uppercase text-[10px] tracking-widest">
+                        <tr>
+                            <th class="px-4 py-3">When</th>
+                            <th class="px-4 py-3">Action</th>
+                            <th class="px-4 py-3">By</th>
+                            <th class="px-4 py-3">From</th>
+                            <th class="px-4 py-3">To</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for ev in history_events %}
+                        <tr class="align-top">
+                            <td class="px-4 py-3 text-slate-500 whitespace-nowrap">
+                                {{ ev.created_at|date:"d M Y, H:i" }}
+                            </td>
+                            <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">
+                                {{ ev.action }}
+                            </td>
+                            <td class="px-4 py-3 text-slate-700 whitespace-nowrap">
+                                {% if ev.actor %}
+                                    {{ ev.actor.full_name|default:ev.actor.email }}
+                                {% else %}
+                                    System
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-slate-500">
+                                {% if ev.from_status or ev.from_department %}
+                                    {% if ev.from_status %}Status: {{ ev.from_status }}{% endif %}
+                                    {% if ev.from_department %}
+                                        {% if ev.from_status %}<br>{% endif %}
+                                        Dept: {{ ev.from_department.name }}
+                                    {% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-slate-700">
+                                {% if ev.to_status or ev.to_department %}
+                                    {% if ev.to_status %}Status: {{ ev.to_status }}{% endif %}
+                                    {% if ev.to_department %}
+                                        {% if ev.to_status %}<br>{% endif %}
+                                        Dept: {{ ev.to_department.name }}
+                                    {% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

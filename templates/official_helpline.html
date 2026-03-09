@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helpline Department | CivicAssist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-card { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <nav class="fixed w-full z-50 glass h-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
+            <div class="flex items-center" onclick="window.location.href='/'" style="cursor: pointer;">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mr-3">
+                    <span class="text-xl">🏛️</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">Civic<span class="text-indigo-600">Assist</span></h1>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter leading-none mt-1">Official Portal</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-8">
+                <h2 class="text-2xl font-extrabold text-slate-900 mb-2">Helpline Department Overview</h2>
+                {% if helpline %}
+                    <p class="text-sm text-slate-500 mb-4">
+                        This is the fallback department where misrouted or unclassified complaints land.
+                    </p>
+                    <div class="border border-indigo-100 bg-indigo-50/60 rounded-2xl p-4 mb-4">
+                        <p class="text-[11px] text-indigo-500 uppercase tracking-widest mb-1 font-semibold">Helpline</p>
+                        <p class="font-semibold text-slate-900 mb-1">{{ helpline.name }}</p>
+                        <p class="text-sm text-slate-600">
+                            {{ helpline.problems_covered }}
+                        </p>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        Suggested future enhancement: a dedicated queue view only for HELPLINE-tagged complaints,
+                        and an internal routing workflow to forward to the final department.
+                    </p>
+                {% else %}
+                    <p class="text-sm text-slate-500 mb-4">
+                        Helpline department is not configured. Please ensure `ensure_departments_seeded()` has been run.
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+

@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | CivicAssist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(226, 232, 240, 0.8); }
+        .glass-card { background: #ffffff; border: 1px solid rgba(226, 232, 240, 0.8); box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+    <nav class="fixed w-full z-50 glass h-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
+            <div class="flex items-center" onclick="window.location.href='/'" style="cursor: pointer;">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mr-3">
+                    <span class="text-xl">🏛️</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight leading-none">Civic<span class="text-indigo-600">Assist</span></h1>
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-tighter leading-none mt-1">Citizen Portal</p>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 pb-20">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-2xl font-extrabold text-slate-900">My Profile</h2>
+                    <a href="{% url 'citizen_profile_edit' %}" class="inline-flex items-center px-4 py-2 rounded-2xl bg-indigo-50 text-indigo-600 text-xs font-bold border border-indigo-100 hover:bg-indigo-600 hover:text-white transition-all">
+                        Edit Profile
+                    </a>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Full Name</p>
+                        <p class="font-semibold text-slate-800">{{ full_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Email</p>
+                        <p class="font-semibold text-slate-800 break-all">{{ email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Phone Number</p>
+                        <p class="font-semibold text-slate-800">{{ phone_number }}</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Aadhar Number</p>
+                        <p class="font-semibold text-slate-800">{{ aadhar_number }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Address</p>
+                        <p class="font-semibold text-slate-800">
+                            {% if address %}{{ address }}{% else %}<span class="text-slate-400">Not set</span>{% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">City</p>
+                        <p class="font-semibold text-slate-800">
+                            {% if city %}{{ city }}{% else %}<span class="text-slate-400">Not set</span>{% endif %}
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-slate-400 text-[11px] uppercase tracking-widest mb-1">Pincode</p>
+                        <p class="font-semibold text-slate-800">
+                            {% if pincode %}{{ pincode }}{% else %}<span class="text-slate-400">Not set</span>{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
+

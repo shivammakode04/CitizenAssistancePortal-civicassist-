@@ -1,0 +1,78 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sign Up | CivicAssist{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div class="glass-card w-full max-w-lg p-8 rounded-3xl relative overflow-hidden shadow-2xl bg-white">
+        
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Create an Account</h2>
+            <p class="text-slate-500 text-sm">Join CivicAssist to easily report and track local issues.</p>
+        </div>
+
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="p-4 mb-2 text-sm {% if message.tags == 'error' %}text-red-700 bg-red-100{% else %}text-green-700 bg-green-100{% endif %} rounded-xl border border-current">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'signup' %}" class="space-y-5">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Full Name</label>
+                    <input type="text" name="full_name" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="John Doe" required>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Aadhar Number (12 Digits)</label>
+                    <input type="text" name="aadhar_number" pattern="[0-9]{12}" maxlength="12" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="XXXX XXXX XXXX" required>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Email Address</label>
+                    <input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="john@example.com" required>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Phone Number</label>
+                    <input type="tel" name="phone" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="+91 98765 43210" required>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Password</label>
+                    <input type="password" name="password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="••••••••" required>
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="flex items-start mt-2">
+                <div class="flex items-center h-5">
+                    <input id="terms" name="terms" type="checkbox" class="w-4 h-4 text-indigo-600 bg-slate-50 border-slate-300 rounded focus:ring-indigo-500" required>
+                </div>
+                <div class="ml-3 text-sm">
+                    <label for="terms" class="font-medium text-slate-600">I agree to the <a href="#" class="text-indigo-600 hover:underline">Terms & Conditions</a></label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3.5 rounded-xl hover:shadow-lg hover:shadow-indigo-500/30 transition-all mt-4">Create Account</button>
+            
+            <p class="text-center text-sm text-slate-500 mt-6">
+                Already have an account? <a href="{% url 'login' %}" class="text-indigo-600 hover:text-indigo-500 font-bold transition-colors">Login here</a>
+            </p>
+        </form>
+    </div>
+</div>
+{% endblock %}

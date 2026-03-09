@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}File Complaint | CivicAssist{% endblock %}
+
+{% block nav_actions %}
+<a href="{% url 'citizen_dashboard' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 transition-all">
+    Dashboard
+</a>
+<form method="POST" action="{% url 'logout' %}" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-semibold border border-red-200 hover:bg-red-600 hover:text-white transition-all">
+        Logout
+    </button>
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="glass-card rounded-3xl p-8 shadow-2xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1">
+                    File a New Complaint
+                </h1>
+                <p class="text-slate-500 text-sm">
+                    Describe your issue clearly. Our ML engine will auto-route it to the right department and set the priority.
+                </p>
+            </div>
+            <div class="hidden md:flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    📝
+                </div>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                    <div class="px-4 py-3 rounded-xl text-sm border
+                        {% if message.tags == 'error' %} bg-red-50 text-red-700 border-red-200
+                        {% elif message.tags == 'success' %} bg-emerald-50 text-emerald-700 border-emerald-200
+                        {% else %} bg-indigo-50 text-indigo-700 border-indigo-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">
+                    Complaint Description
+                </label>
+                <p class="text-[11px] text-slate-400 mb-2">
+                    Example: "No water supply since 2 days in my colony" or "Big potholes on main road near XYZ square".
+                </p>
+                <textarea
+                    name="description"
+                    rows="5"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                    placeholder="Describe your issue with location landmark, duration, and impact..."
+                    required
+                ></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            Location (Area / Landmark)
+                        </label>
+                        <input
+                            type="text"
+                            name="location"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                            placeholder="e.g. Near Bus Stand, Ward 12"
+                            required
+                        />
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">
+                                City
+                            </label>
+                            <input
+                                type="text"
+                                name="city"
+                                id="city-input"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                placeholder="e.g. Bhopal"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">
+                                District
+                            </label>
+                            <input
+                                type="text"
+                                name="district"
+                                id="district-input"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                placeholder="e.g. Bhopal"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            Pincode
+                        </label>
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="text"
+                                name="pincode"
+                                id="pincode-input"
+                                maxlength="6"
+                                class="flex-1 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                placeholder="e.g. 462001"
+                            />
+                            <button
+                                type="button"
+                                onclick="fetchLocationFromPincode()"
+                                class="inline-flex items-center px-3 py-2 rounded-2xl bg-slate-900 text-white text-xs font-semibold hover:bg-indigo-600 transition-all"
+                            >
+                                Auto-fill
+                            </button>
+                        </div>
+                        <p id="pincode-helper" class="mt-1 text-[11px] text-slate-400">
+                            Enter PIN and click Auto-fill to fetch city & district. You can still edit manually.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 border border-dashed border-slate-200 rounded-2xl px-4 py-3 text-xs text-slate-500 flex items-start space-x-3">
+                    <div class="mt-0.5 text-indigo-500 text-lg">🤖</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 mb-1">Smart Auto-Routing Enabled</p>
+                        <p class="mb-2">
+                            Based on your description, the system will automatically
+                            <span class="font-semibold text-indigo-600">select the department and priority</span>.
+                            You can always track it from your dashboard.
+                        </p>
+                        <p class="text-[11px] text-slate-400">
+                            Location details help departments act faster, but all fields can be edited by you.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">
+                        Attach Photo (Optional)
+                    </label>
+                    <p class="text-[11px] text-slate-400 mb-2">
+                        Add a clear photo or screenshot related to your complaint (max ~5MB). This helps officials
+                        understand the issue faster.
+                    </p>
+                    <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        class="w-full text-sm text-slate-600 file:mr-4 file:py-2.5 file:px-4 file:rounded-2xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                    />
+                </div>
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl px-4 py-3 text-xs text-slate-600 flex items-start space-x-3">
+                    <div class="mt-0.5 text-indigo-500 text-lg">📷</div>
+                    <div>
+                        <p class="font-semibold text-slate-700 mb-1">Photo Evidence Tips</p>
+                        <ul class="list-disc pl-4 space-y-0.5 text-[11px]">
+                            <li>Capture the main problem area clearly.</li>
+                            <li>Avoid uploading documents with sensitive personal data.</li>
+                            <li>One image is enough to start the case.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <a href="{% url 'citizen_dashboard' %}" class="text-xs text-slate-500 hover:text-slate-700 font-medium">
+                    ← Back to Dashboard
+                </a>
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all"
+                >
+                    Submit Complaint
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    async function fetchLocationFromPincode() {
+        const pinInput = document.getElementById('pincode-input');
+        const cityInput = document.getElementById('city-input');
+        const districtInput = document.getElementById('district-input');
+        const helper = document.getElementById('pincode-helper');
+
+        if (!pinInput || !cityInput || !districtInput || !helper) {
+            return;
+        }
+
+        const pincode = (pinInput.value || '').trim();
+        if (pincode.length < 4) {
+            helper.textContent = 'Please enter a valid pincode (at least 4 digits).';
+            helper.classList.remove('text-emerald-500');
+            helper.classList.add('text-red-500');
+            return;
+        }
+
+        helper.textContent = 'Looking up city and district...';
+        helper.classList.remove('text-red-500', 'text-emerald-500');
+        helper.classList.add('text-slate-400');
+
+        try {
+            const res = await fetch('https://api.postalpincode.in/pincode/' + encodeURIComponent(pincode));
+            const data = await res.json();
+
+            if (!Array.isArray(data) || !data[0] || data[0].Status !== 'Success') {
+                helper.textContent = 'Could not find details for this pincode. You can fill fields manually.';
+                helper.classList.remove('text-slate-400', 'text-emerald-500');
+                helper.classList.add('text-red-500');
+                return;
+            }
+
+            const office = (data[0].PostOffice && data[0].PostOffice[0]) || null;
+            if (!office) {
+                helper.textContent = 'No location data returned. Please enter details manually.';
+                helper.classList.remove('text-slate-400', 'text-emerald-500');
+                helper.classList.add('text-red-500');
+                return;
+            }
+
+            if (!cityInput.value) {
+                cityInput.value = office.Block || office.District || '';
+            }
+            if (!districtInput.value) {
+                districtInput.value = office.District || '';
+            }
+
+            helper.textContent = 'Location auto-filled. You can still change the values if needed.';
+            helper.classList.remove('text-slate-400', 'text-red-500');
+            helper.classList.add('text-emerald-500');
+        } catch (e) {
+            helper.textContent = 'Network error while fetching pincode details. Please fill fields manually.';
+            helper.classList.remove('text-slate-400', 'text-emerald-500');
+            helper.classList.add('text-red-500');
+        }
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,283 @@
+Folder: core
+File: admin.py
+
+from django.contrib import admin
+
+# Register your models here.
+
+Folder: core
+File: apps.py
+
+from django.apps import AppConfig
+
+class CoreConfig(AppConfig):
+    name = 'core'
+
+Folder: core
+File: models.py
+
+# (empty or whitespace only)
+
+Folder: core
+File: tests.py
+
+from django.test import TestCase
+
+# Create your tests here.
+
+Folder: core
+File: urls.py
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.citizen_view, name='citizen_dashboard'),
+]
+
+Folder: core
+File: views.py
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def citizen_view(request):
+    return render(request, 'citizendashboard.html')
+
+Folder: core
+File: __init__.py
+
+# (empty)
+
+Folder: accounts
+File: admin.py
+
+from django.contrib import admin
+from .models import User, Citizen, Official
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'full_name', 'is_citizen', 'is_official', 'is_staff')
+    list_filter = ('is_citizen', 'is_official', 'is_staff', 'is_superuser')
+    search_fields = ('email', 'full_name', 'aadhar_number', 'phone_number')
+
+@admin.register(Citizen)
+class CitizenAdmin(admin.ModelAdmin):
+    list_display = ('user', 'city', 'pincode')
+    search_fields = ('user__email', 'city')
+
+@admin.register(Official)
+class OfficialAdmin(admin.ModelAdmin):
+    list_display = ('user', 'official_id', 'department')
+    list_filter = ('department',)
+    search_fields = ('official_id', 'user__email')
+
+Folder: accounts
+File: apps.py
+
+from django.apps import AppConfig
+
+class AccountsConfig(AppConfig):
+    name = 'accounts'
+
+Folder: accounts
+File: models.py
+
+from django.db import models
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email: raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        extra_fields.setdefault('username', email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class User(AbstractUser):
+    email = models.EmailField(unique=True)
+    full_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=15, unique=True)
+    aadhar_number = models.CharField(max_length=12, unique=True)
+    is_citizen = models.BooleanField(default=False)
+    is_official = models.BooleanField(default=False)
+
+    objects = CustomUserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['full_name', 'phone_number', 'aadhar_number']
+
+class Citizen(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='citizen_profile')
+    address = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    pincode = models.CharField(max_length=6, null=True, blank=True)
+
+class Official(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='official_profile')
+    official_id = models.CharField(max_length=50, unique=True)
+    department = models.CharField(max_length=100)
+
+Folder: accounts
+File: tests.py
+
+from django.test import TestCase
+
+# Create your tests here.
+
+Folder: accounts
+File: urls.py
+
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('login/', views.user_login, name='login'),
+    path('signup/', views.signup, name='signup'),
+    # path('logout/', views.user_logout, name='logout'),
+]
+
+Folder: accounts
+File: views.py
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import login as auth_login, authenticate
+from .models import User, Citizen
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+def user_login(request):
+    return render(request, 'login.html')
+
+def signup(request):
+    return render(request, 'signup.html')
+
+# def home(request):
+#     return render(request, 'index.html')
+#code to be continue.........................
+
+# 1. Login View (Naam badal diya)
+
+def user_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('citizen_dashboard')
+        else:
+            messages.error(request, "Invalid Email or Password")
+
+    return render(request, 'login.html')
+
+# 2. Signup View
+def signup(request):
+    if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        aadhar = request.POST.get('aadhar_number')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone') 
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        # Validation
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists!")
+            return render(request, 'signup.html')
+        
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return render(request, 'signup.html')
+
+        try:
+            # User create karna
+            user = User.objects.create_user(
+                email=email,
+                password=password,
+                full_name=full_name,
+                phone_number=phone,
+                aadhar_number=aadhar,
+                is_citizen=True
+            )
+            Citizen.objects.create(user=user)
+
+            messages.success(request, "Account created! Please Login.")
+            
+            # LOGIN PAGE PAR BHEJNE KE LIYE:
+            return redirect('login') 
+
+        except Exception as e:
+            messages.error(request, "Invalid input, try again")
+            return render(request, 'signup.html')
+
+    return render(request, 'signup.html')
+
+Folder: accounts
+File: __init__.py
+
+# (empty)
+
+Folder: civicassist
+File: asgi.py
+
+"""
+ASGI config for civicassist project.
+
+It exposes the ASGI callable as a module-level variable named ``application``.
+
+For more information on this file, see
+https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
+"""
+
+import os
+
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'civicassist.settings')
+
+application = get_asgi_application()
+
+Folder: civicassist
+File: settings.py
+
+# (truncated, see file for full content)
+"""
+Django settings for civicassist project.
+Generated by 'django-admin startproject' using Django 5.1.1.
+...existing code...
+
+Folder: civicassist
+File: urls.py
+
+"""
+URL configuration for civicassist project.
+...existing code...
+
+Folder: civicassist
+File: views.py
+
+from django.shortcuts import redirect, render
+
+def home(request):
+    return render(request, 'index.html')
+
+Folder: civicassist
+File: wsgi.py
+
+"""
+WSGI config for civicassist project.
+...existing code...
+
+Folder: civicassist
+File: __init__.py
+
+# (empty)

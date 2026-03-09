@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications | CivicAssist{% endblock %}
+
+{% block nav_actions %}
+<a href="{% url 'citizen_dashboard' %}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-sm font-semibold border border-slate-200 transition-all">
+    Dashboard
+</a>
+<form method="POST" action="{% url 'logout' %}" class="inline">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-semibold border border-red-200 hover:bg-red-600 hover:text-white transition-all">
+        Logout
+    </button>
+</form>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-10">
+    <div class="glass-card rounded-3xl p-8 shadow-2xl border border-slate-200 bg-white">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 mb-1">
+                    Notifications
+                </h1>
+                <p class="text-slate-500 text-sm">
+                    Updates from departments about your complaints, including closures and transfers.
+                </p>
+            </div>
+            <div class="hidden md:flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    🔔
+                </div>
+            </div>
+        </div>
+
+        {% if notifications %}
+            <div class="space-y-4">
+                {% for n in notifications %}
+                    <div class="border rounded-2xl px-4 py-3 text-sm flex items-start justify-between
+                        {% if n.is_read %}bg-slate-50 border-slate-200{% else %}bg-indigo-50/50 border-indigo-200{% endif %}">
+                        <div>
+                            <p class="text-slate-800">
+                                {{ n.message }}
+                            </p>
+                            <p class="text-[11px] text-slate-400 mt-1">
+                                {{ n.created_at|date:"d M Y, H:i" }}
+                                {% if n.complaint %}
+                                    &middot; Ticket <span class="font-semibold text-slate-700">{{ n.complaint.ticket_number }}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end space-y-2 ml-4">
+                            {% if n.complaint and n.complaint.status == 'CLOSED' %}
+                                <form method="POST" action="{% url 'reopen_complaint' n.complaint.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit"
+                                            class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[11px] font-semibold shadow-sm hover:shadow-md">
+                                        Reopen
+                                    </button>
+                                </form>
+                            {% endif %}
+                            <form method="POST" action="{% url 'acknowledge_notification' n.id %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="inline-flex items-center px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 text-[11px] font-semibold">
+                                    {% if n.is_read %}Close{% else %}Mark as Read{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-sm text-slate-500">
+                No notifications yet. Once a department updates the status of your complaints,
+                you will see messages here.
+            </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
